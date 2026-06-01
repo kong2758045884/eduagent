@@ -19,9 +19,27 @@ mybatis-plus:
       id-type: auto
 
 jwt:
-  # 至少 32 字节，生产环境请通过环境变量或配置中心注入，不要提交真实密钥。
+  # Local development only. Production must inject JWT_SECRET from environment or a secret manager.
   secret: "dev-only-change-me-please-keep-this-secret-at-least-32-bytes"
   expiration: 86400000
+
+ai:
+  qwen:
+    # Set DASHSCOPE_API_KEY before running locally. Do not commit real API keys.
+    api-key: ${DASHSCOPE_API_KEY:}
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    native-base-url: https://dashscope.aliyuncs.com/api/v1
+    text-model: qwen-plus
+    vision-model: qwen-vl-plus
+    audio-model: qwen3-asr-flash
+    ocr-model: qwen-vl-ocr-latest
+    temperature: 0.4
+    timeout-seconds: 60
+    speech-max-base64-bytes: 10485760
+
+file:
+  upload-root: uploads
+  public-base-url: /uploads
 
 springdoc:
   swagger-ui:

@@ -14,6 +14,16 @@ public class RegisterRequest {
 
     private String nickname;
 
+    private String teacherType;
+
+    private String county;
+
+    private String school;
+
+    private String subject;
+
+    private String grade;
+
     public String getUsername() {
         return username;
     }
@@ -36,5 +46,45 @@ public class RegisterRequest {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public String getTeacherType() {
+        return teacherType;
+    }
+
+    public void setTeacherType(String teacherType) {
+        this.teacherType = teacherType;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getSchool() {
+        return school;
+    }
+
+    public void setSchool(String school) {
+        this.school = school;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 }

@@ -46,6 +46,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setNickname(StringUtils.hasText(request.getNickname()) ? request.getNickname().trim() : username);
         user.setRole(DEFAULT_ROLE);
+        user.setTeacherType(normalizeTeacherType(request.getTeacherType()));
+        user.setCounty(trimToNull(request.getCounty()));
+        user.setSchool(trimToNull(request.getSchool()));
+        user.setSubject(defaultText(request.getSubject(), "数学"));
+        user.setGrade(trimToNull(request.getGrade()));
         user.setStatus(STATUS_ENABLED);
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
@@ -86,5 +91,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
         return user;
+    }
+
+    private String normalizeTeacherType(String teacherType) {
+        if (!StringUtils.hasText(teacherType)) {
+            return "senior";
+        }
+        String value = teacherType.trim();
+        if ("mid".equals(value) || "novice".equals(value) || "senior".equals(value)) {
+            return value;
+        }
+        return "senior";
+    }
+
+    private String trimToNull(String value) {
+        return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private String defaultText(String value, String fallback) {
+        return StringUtils.hasText(value) ? value.trim() : fallback;
     }
 }

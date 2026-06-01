@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: training-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:20MB}
+      max-request-size: ${MAX_REQUEST_SIZE:25MB}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+ai:
+  qwen:
+    api-key: ${DASHSCOPE_API_KEY}
+    base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+    native-base-url: ${DASHSCOPE_NATIVE_BASE_URL:https://dashscope.aliyuncs.com/api/v1}
+    text-model: ${QWEN_TEXT_MODEL:qwen-plus}
+    vision-model: ${QWEN_VISION_MODEL:qwen-vl-plus}
+    audio-model: ${QWEN_AUDIO_MODEL:qwen3-asr-flash}
+    ocr-model: ${QWEN_OCR_MODEL:qwen-vl-ocr-latest}
+    temperature: ${QWEN_TEMPERATURE:0.4}
+    timeout-seconds: ${QWEN_TIMEOUT_SECONDS:60}
+    speech-max-base64-bytes: ${QWEN_SPEECH_MAX_BASE64_BYTES:10485760}
+
+file:
+  storage-type: ${FILE_STORAGE_TYPE:oss}
+  upload-root: ${UPLOAD_ROOT:uploads}
+  public-base-url: ${PUBLIC_BASE_URL:/uploads}
+  oss-endpoint: ${OSS_ENDPOINT}
+  oss-bucket-name: ${OSS_BUCKET}
+  oss-access-key-id: ${OSS_ACCESS_KEY_ID}
+  oss-access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+  oss-custom-domain: ${OSS_CUSTOM_DOMAIN:}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
