@@ -2,6 +2,10 @@ package com.innovation.training.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @ConfigurationProperties(prefix = "file")
 public class FileStorageProperties {
 
@@ -27,6 +31,29 @@ public class FileStorageProperties {
 
     public void setUploadRoot(String uploadRoot) {
         this.uploadRoot = uploadRoot;
+    }
+
+    public Path resolveUploadRoot() {
+        Path configured = Path.of(uploadRoot);
+        if (configured.isAbsolute()) {
+            return configured.normalize();
+        }
+        return resolveApplicationDirectory().resolve(configured).normalize();
+    }
+
+    private Path resolveApplicationDirectory() {
+        try {
+            Path codeSource = Path.of(FileStorageProperties.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI()).toAbsolutePath().normalize();
+            if (Files.isRegularFile(codeSource)) {
+                return codeSource.getParent();
+            }
+        } catch (URISyntaxException | RuntimeException ignored) {
+            // Fall back to the process working directory below.
+        }
+        return Path.of("").toAbsolutePath().normalize();
     }
 
     public String getPublicBaseUrl() {

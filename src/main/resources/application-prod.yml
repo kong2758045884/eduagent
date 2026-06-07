@@ -1,14 +1,14 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8082}
 
 spring:
   application:
     name: training-backend
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/training_backend?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:training_backend}
+    password: ${DB_PASSWORD:XWTM7NXbS4nbn2rY}
   servlet:
     multipart:
       max-file-size: ${MAX_FILE_SIZE:20MB}
@@ -22,12 +22,12 @@ mybatis-plus:
       id-type: auto
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:dev-only-change-me-please-keep-this-secret-at-least-32-bytes}
   expiration: ${JWT_EXPIRATION:86400000}
 
 ai:
   qwen:
-    api-key: ${DASHSCOPE_API_KEY}
+    api-key: ${DASHSCOPE_API_KEY:}
     base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
     native-base-url: ${DASHSCOPE_NATIVE_BASE_URL:https://dashscope.aliyuncs.com/api/v1}
     text-model: ${QWEN_TEXT_MODEL:qwen-plus}
@@ -39,13 +39,13 @@ ai:
     speech-max-base64-bytes: ${QWEN_SPEECH_MAX_BASE64_BYTES:10485760}
 
 file:
-  storage-type: ${FILE_STORAGE_TYPE:oss}
+  storage-type: ${FILE_STORAGE_TYPE:local}
   upload-root: ${UPLOAD_ROOT:uploads}
   public-base-url: ${PUBLIC_BASE_URL:/uploads}
-  oss-endpoint: ${OSS_ENDPOINT}
-  oss-bucket-name: ${OSS_BUCKET}
-  oss-access-key-id: ${OSS_ACCESS_KEY_ID}
-  oss-access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+  oss-endpoint: ${OSS_ENDPOINT:}
+  oss-bucket-name: ${OSS_BUCKET:}
+  oss-access-key-id: ${OSS_ACCESS_KEY_ID:}
+  oss-access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
   oss-custom-domain: ${OSS_CUSTOM_DOMAIN:}
 
 springdoc:
