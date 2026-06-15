@@ -26,16 +26,41 @@ CREATE TABLE IF NOT EXISTS `user` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_user_username` (`username`)
+    UNIQUE KEY `uk_user_username_teacher_type` (`username`, `teacher_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 SET @schema_name = DATABASE();
+
 SET @column_exists = (
     SELECT COUNT(*) FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = 'user' AND COLUMN_NAME = 'teacher_type'
 );
 SET @sql = IF(@column_exists = 0,
     'ALTER TABLE `user` ADD COLUMN `teacher_type` VARCHAR(32) NOT NULL DEFAULT ''senior'' COMMENT ''教师端类型：senior/mid/novice'' AFTER `role`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @index_exists = (
+    SELECT COUNT(*) FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = 'user' AND INDEX_NAME = 'uk_user_username'
+);
+SET @sql = IF(@index_exists > 0,
+    'ALTER TABLE `user` DROP INDEX `uk_user_username`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @index_exists = (
+    SELECT COUNT(*) FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = 'user' AND INDEX_NAME = 'uk_user_username_teacher_type'
+);
+SET @sql = IF(@index_exists = 0,
+    'ALTER TABLE `user` ADD UNIQUE KEY `uk_user_username_teacher_type` (`username`, `teacher_type`)',
     'SELECT 1'
 );
 PREPARE stmt FROM @sql;

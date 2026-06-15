@@ -5,6 +5,8 @@ import com.innovation.training.module.user.dto.LoginResponse;
 import com.innovation.training.module.user.dto.RegisterRequest;
 import com.innovation.training.module.user.dto.UserResponse;
 
+import java.util.List;
+
 public interface UserService {
 
     UserResponse register(RegisterRequest request);
@@ -12,4 +14,6 @@ public interface UserService {
     LoginResponse login(LoginRequest request);
 
     UserResponse getByUsername(String username);
+
+    List<String> getTeacherTypes(String username);
 }

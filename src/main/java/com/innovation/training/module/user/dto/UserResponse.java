@@ -3,6 +3,7 @@ package com.innovation.training.module.user.dto;
 import com.innovation.training.module.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class UserResponse {
 
@@ -11,6 +12,7 @@ public class UserResponse {
     private String nickname;
     private String role;
     private String teacherType;
+    private List<String> teacherTypes;
     private String county;
     private String school;
     private String avatarUrl;
@@ -27,12 +29,17 @@ public class UserResponse {
     private LocalDateTime updatedAt;
 
     public static UserResponse from(User user) {
+        return from(user, user.getTeacherType() == null ? List.of() : List.of(user.getTeacherType()));
+    }
+
+    public static UserResponse from(User user, List<String> teacherTypes) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());
         response.setNickname(user.getNickname());
         response.setRole(user.getRole());
         response.setTeacherType(user.getTeacherType());
+        response.setTeacherTypes(teacherTypes);
         response.setCounty(user.getCounty());
         response.setSchool(user.getSchool());
         response.setAvatarUrl(user.getAvatarUrl());
@@ -88,6 +95,14 @@ public class UserResponse {
 
     public void setTeacherType(String teacherType) {
         this.teacherType = teacherType;
+    }
+
+    public List<String> getTeacherTypes() {
+        return teacherTypes;
+    }
+
+    public void setTeacherTypes(List<String> teacherTypes) {
+        this.teacherTypes = teacherTypes;
     }
 
     public String getCounty() {

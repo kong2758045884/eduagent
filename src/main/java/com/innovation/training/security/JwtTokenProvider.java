@@ -23,18 +23,28 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(String username) {
+        return generateToken(username, null);
+    }
+
+    public String generateToken(String username, String teacherType) {
         Date now = new Date();
         Date expiresAt = new Date(now.getTime() + expiration);
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(username)
                 .issuedAt(now)
-                .expiration(expiresAt)
-                .signWith(secretKey)
-                .compact();
+                .expiration(expiresAt);
+        if (teacherType != null && !teacherType.isBlank()) {
+            builder.claim("teacherType", teacherType);
+        }
+        return builder.signWith(secretKey).compact();
     }
 
     public String getUsername(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public String getTeacherType(String token) {
+        return parseClaims(token).get("teacherType", String.class);
     }
 
     public boolean validateToken(String token) {

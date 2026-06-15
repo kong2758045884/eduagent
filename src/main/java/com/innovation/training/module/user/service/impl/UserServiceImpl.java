@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -37,32 +38,66 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public UserResponse register(RegisterRequest request) {
         String username = request.getUsername().trim();
-        if (existsByUsername(username)) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名已存在");
+        String teacherType = normalizeTeacherType(request.getTeacherType());
+        if (getUserByUsernameAndTeacherType(username, teacherType) != null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该用户身份已注册");
+        }
+
+        List<User> existingUsers = listByUsername(username);
+        User baseUser = existingUsers.isEmpty() ? null : existingUsers.get(0);
+        if (baseUser != null) {
+            if (baseUser.getStatus() == null || baseUser.getStatus() == 0) {
+                throw new BusinessException(ErrorCode.FORBIDDEN, "用户已被禁用");
+            }
+            if (!passwordEncoder.matches(request.getPassword(), baseUser.getPassword())) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名已存在，请使用原账号密码添加新身份");
+            }
         }
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setNickname(StringUtils.hasText(request.getNickname()) ? request.getNickname().trim() : username);
-        user.setRole(DEFAULT_ROLE);
-        user.setTeacherType(normalizeTeacherType(request.getTeacherType()));
-        user.setCounty(trimToNull(request.getCounty()));
-        user.setSchool(trimToNull(request.getSchool()));
-        user.setSubject(defaultText(request.getSubject(), "数学"));
-        user.setGrade(trimToNull(request.getGrade()));
-        user.setStatus(STATUS_ENABLED);
+        user.setPassword(baseUser == null ? passwordEncoder.encode(request.getPassword()) : baseUser.getPassword());
+        user.setNickname(defaultText(request.getNickname(), baseUser == null ? username : baseUser.getNickname()));
+        user.setRole(baseUser == null ? DEFAULT_ROLE : defaultText(baseUser.getRole(), DEFAULT_ROLE));
+        user.setTeacherType(teacherType);
+        user.setCounty(defaultText(request.getCounty(), baseUser == null ? null : baseUser.getCounty()));
+        user.setSchool(defaultText(request.getSchool(), baseUser == null ? null : baseUser.getSchool()));
+        user.setAvatarUrl(baseUser == null ? null : baseUser.getAvatarUrl());
+        user.setRealName(baseUser == null ? null : baseUser.getRealName());
+        user.setPhone(baseUser == null ? null : baseUser.getPhone());
+        user.setSubject(defaultText(request.getSubject(), baseUser == null ? "数学" : baseUser.getSubject()));
+        user.setGrade(defaultText(request.getGrade(), baseUser == null ? null : baseUser.getGrade()));
+        user.setTitle(baseUser == null ? null : baseUser.getTitle());
+        user.setTeachingYears(baseUser == null ? null : baseUser.getTeachingYears());
+        user.setBio(baseUser == null ? null : baseUser.getBio());
+        user.setExpertiseTags(baseUser == null ? null : baseUser.getExpertiseTags());
+        user.setStatus(baseUser == null || baseUser.getStatus() == null ? STATUS_ENABLED : baseUser.getStatus());
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         save(user);
 
-        return UserResponse.from(user);
+        return UserResponse.from(user, getTeacherTypes(username));
     }
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        User user = getUserByUsername(request.getUsername().trim());
+        String username = request.getUsername().trim();
+        String teacherType = normalizeTeacherTypeOrNull(request.getTeacherType());
+        List<User> users = listByUsername(username);
+        if (users.isEmpty()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
+        }
+
+        User user = teacherType == null
+                ? users.get(0)
+                : users.stream()
+                .filter(item -> teacherType.equals(item.getTeacherType()))
+                .findFirst()
+                .orElse(null);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该账号未注册当前身份");
+        }
         if (user.getStatus() == null || user.getStatus() == 0) {
             throw new BusinessException(ErrorCode.FORBIDDEN, "用户已被禁用");
         }
@@ -70,27 +105,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
 
-        String token = jwtTokenProvider.generateToken(user.getUsername());
-        return new LoginResponse(token, "Bearer", UserResponse.from(user));
+        String token = jwtTokenProvider.generateToken(user.getUsername(), user.getTeacherType());
+        return new LoginResponse(token, "Bearer", UserResponse.from(user, getTeacherTypes(username)));
     }
 
     @Override
     public UserResponse getByUsername(String username) {
-        return UserResponse.from(getUserByUsername(username));
+        User user = getPrimaryUserByUsername(username);
+        return UserResponse.from(user, getTeacherTypes(username));
     }
 
-    private boolean existsByUsername(String username) {
-        return count(new LambdaQueryWrapper<User>().eq(User::getUsername, username)) > 0;
+    @Override
+    public List<String> getTeacherTypes(String username) {
+        return listByUsername(username).stream()
+                .map(User::getTeacherType)
+                .filter(StringUtils::hasText)
+                .distinct()
+                .toList();
     }
 
-    private User getUserByUsername(String username) {
+    private User getPrimaryUserByUsername(String username) {
         User user = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getUsername, username)
+                .orderByAsc(User::getId)
                 .last("LIMIT 1"));
         if (user == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
         return user;
+    }
+
+    private User getUserByUsernameAndTeacherType(String username, String teacherType) {
+        return getOne(new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, username)
+                .eq(User::getTeacherType, teacherType)
+                .last("LIMIT 1"));
+    }
+
+    private List<User> listByUsername(String username) {
+        return list(new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, username)
+                .orderByAsc(User::getId));
     }
 
     private String normalizeTeacherType(String teacherType) {
@@ -104,8 +159,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return "senior";
     }
 
-    private String trimToNull(String value) {
-        return StringUtils.hasText(value) ? value.trim() : null;
+    private String normalizeTeacherTypeOrNull(String teacherType) {
+        if (!StringUtils.hasText(teacherType)) {
+            return null;
+        }
+        return normalizeTeacherType(teacherType);
     }
 
     private String defaultText(String value, String fallback) {

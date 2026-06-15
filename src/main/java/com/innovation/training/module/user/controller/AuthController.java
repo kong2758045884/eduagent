@@ -6,6 +6,7 @@ import com.innovation.training.module.user.dto.LoginResponse;
 import com.innovation.training.module.user.dto.RegisterRequest;
 import com.innovation.training.module.user.dto.UserResponse;
 import com.innovation.training.module.user.service.UserService;
+import com.innovation.training.support.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserService userService;
+    private final CurrentUserService currentUserService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, CurrentUserService currentUserService) {
         this.userService = userService;
+        this.currentUserService = currentUserService;
     }
 
     @Operation(summary = "用户注册")
@@ -42,6 +45,8 @@ public class AuthController {
     @Operation(summary = "获取当前登录用户信息")
     @GetMapping("/me")
     public Result<UserResponse> me(Authentication authentication) {
-        return Result.success(userService.getByUsername(authentication.getName()));
+        return Result.success(UserResponse.from(
+                currentUserService.requireUser(authentication),
+                userService.getTeacherTypes(authentication.getName())));
     }
 }
