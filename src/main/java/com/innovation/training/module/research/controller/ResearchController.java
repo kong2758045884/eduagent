@@ -12,8 +12,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,5 +60,22 @@ public class ResearchController {
     public Result<List<ResearchTopicResponse>> list(Authentication authentication) {
         teacherAccessService.requireAny(authentication, "mid");
         return Result.success(researchService.list(currentUserService.requireUserId(authentication)));
+    }
+
+    @Operation(summary = "更新课题")
+    @PutMapping("/{id}")
+    public Result<ResearchTopicResponse> update(@PathVariable Long id,
+                                                 @Valid @RequestBody SaveTopicRequest request,
+                                                 Authentication authentication) {
+        teacherAccessService.requireAny(authentication, "mid");
+        return Result.success(researchService.update(currentUserService.requireUserId(authentication), id, request));
+    }
+
+    @Operation(summary = "删除课题")
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id, Authentication authentication) {
+        teacherAccessService.requireAny(authentication, "mid");
+        researchService.delete(currentUserService.requireUserId(authentication), id);
+        return Result.success(null);
     }
 }

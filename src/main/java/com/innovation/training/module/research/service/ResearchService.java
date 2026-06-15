@@ -14,4 +14,8 @@ public interface ResearchService {
     ResearchTopicResponse save(Long userId, SaveTopicRequest request);
 
     List<ResearchTopicResponse> list(Long userId);
+
+    ResearchTopicResponse update(Long userId, Long id, SaveTopicRequest request);
+
+    void delete(Long userId, Long id);
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import com.innovation.training.module.library.dto.UploadVideoRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +30,6 @@ public class TeachingLibraryService {
                 .eq(TeachingResource::getAuditStatus, "approved")
                 .in(TeachingResource::getResourceType, List.of("video", "experience"))
                 .orderByDesc(TeachingResource::getCreatedAt);
-        if (StringUtils.hasText(user.getCounty())) {
-            wrapper.eq(TeachingResource::getCounty, user.getCounty());
-        }
         if (StringUtils.hasText(tag)) {
             wrapper.and(item -> item.like(TeachingResource::getTitle, tag.trim())
                     .or()
@@ -56,6 +54,47 @@ public class TeachingLibraryService {
         }
         growthService.record(user.getId(), "teaching_library_favorite", "收藏本土教法资源",
                 "资源 ID：" + resourceId, "resource", resourceId);
+    }
+
+    public ResourceResponse uploadVideo(User user, UploadVideoRequest req) {
+        TeachingResource r = new TeachingResource();
+        r.setUserId(user.getId());
+        r.setTitle(req.getTitle() != null ? req.getTitle().trim() : "未命名视频");
+        r.setSummary(req.getSummary() != null ? req.getSummary().trim() : "");
+        r.setContent(req.getContent() != null ? req.getContent().trim() : "");
+        r.setResourceType("video");
+        r.setSubject("数学");
+        r.setGrade(user.getGrade());
+        r.setCounty(user.getCounty());
+        r.setSchool(user.getSchool());
+        r.setMediaUrl(req.getMediaUrl() != null ? req.getMediaUrl().trim() : "");
+        r.setCoverUrl(req.getCoverUrl() != null ? req.getCoverUrl().trim() : "");
+        r.setDuration(req.getDuration() != null ? req.getDuration().trim() : "");
+        r.setUploader(user.getNickname() != null ? user.getNickname() : user.getUsername());
+        r.setTags(req.getCategory() != null ? req.getCategory().trim() : "其他");
+        r.setAuditStatus("approved");
+        r.setLikes(0); r.setViewCount(0); r.setFavoriteCount(0);
+        LocalDateTime now = LocalDateTime.now();
+        r.setCreatedAt(now); r.setUpdatedAt(now);
+        resourceMapper.insert(r);
+        return ResourceResponse.from(r);
+    }
+
+    public ResourceResponse updateVideo(User user, Long id, UploadVideoRequest req) {
+        TeachingResource r = resourceMapper.selectById(id);
+        if (r == null || !r.getUserId().equals(user.getId())) throw new RuntimeException("无权操作");
+        if (req.getTitle() != null) r.setTitle(req.getTitle().trim());
+        if (req.getSummary() != null) r.setSummary(req.getSummary().trim());
+        if (req.getCategory() != null) r.setTags(req.getCategory().trim());
+        r.setUpdatedAt(LocalDateTime.now());
+        resourceMapper.updateById(r);
+        return ResourceResponse.from(r);
+    }
+
+    public void deleteVideo(User user, Long id) {
+        TeachingResource r = resourceMapper.selectById(id);
+        if (r == null || !r.getUserId().equals(user.getId())) throw new RuntimeException("无权操作");
+        resourceMapper.deleteById(id);
     }
 
     public void watched(User user, Long resourceId) {

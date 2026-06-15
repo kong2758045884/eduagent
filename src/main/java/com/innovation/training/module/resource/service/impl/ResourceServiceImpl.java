@@ -61,7 +61,7 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setTags(trimToNull(request.getTags()));
         resource.setSourceType(trimToNull(request.getSourceType()));
         resource.setSourceId(request.getSourceId());
-        resource.setAuditStatus("pending");
+        resource.setAuditStatus("approved");
         resource.setLikes(0);
         resource.setViewCount(0);
         resource.setFavoriteCount(0);

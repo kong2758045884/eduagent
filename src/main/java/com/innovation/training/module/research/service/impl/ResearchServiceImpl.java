@@ -68,6 +68,29 @@ public class ResearchServiceImpl implements ResearchService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResearchTopicResponse update(Long userId, Long id, SaveTopicRequest request) {
+        ResearchTopic topic = researchTopicMapper.selectOne(new LambdaQueryWrapper<ResearchTopic>()
+                .eq(ResearchTopic::getId, id).eq(ResearchTopic::getUserId, userId));
+        if (topic == null) throw new RuntimeException("课题不存在");
+        topic.setTitle(request.getTitle().trim());
+        topic.setMeta(trimToNull(request.getMeta()));
+        topic.setExtra(trimToNull(request.getExtra()));
+        topic.setSources(trimToNull(request.getSources()));
+        topic.setApplicationDraft(trimToNull(request.getApplicationDraft()));
+        topic.setUpdatedAt(LocalDateTime.now());
+        researchTopicMapper.updateById(topic);
+        return ResearchTopicResponse.from(topic);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long userId, Long id) {
+        researchTopicMapper.delete(new LambdaQueryWrapper<ResearchTopic>()
+                .eq(ResearchTopic::getId, id).eq(ResearchTopic::getUserId, userId));
+    }
+
+    @Override
     public List<ResearchTopicResponse> list(Long userId) {
         return researchTopicMapper.selectList(new LambdaQueryWrapper<ResearchTopic>()
                         .eq(ResearchTopic::getUserId, userId)

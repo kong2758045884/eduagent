@@ -21,7 +21,7 @@ import java.util.UUID;
 @Service
 public class LocalFileStorageService {
 
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 500 * 1024 * 1024;
 
     private final FileStorageProperties properties;
 
@@ -34,7 +34,7 @@ public class LocalFileStorageService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "Upload file must not be empty");
         }
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "Upload file must not exceed 10MB");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "上传文件不能超过 500MB");
         }
 
         try {

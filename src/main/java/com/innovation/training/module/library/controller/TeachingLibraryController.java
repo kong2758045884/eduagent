@@ -9,13 +9,17 @@ import com.innovation.training.support.TeacherAccessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.innovation.training.module.library.dto.UploadVideoRequest;
 import java.util.List;
 
 @Tag(name = "本土教法库")
@@ -49,6 +53,29 @@ public class TeachingLibraryController {
         teacherAccessService.requireAny(authentication, "novice");
         teachingLibraryService.favorite(user, id);
         return Result.success();
+    }
+
+    @Operation(summary = "上传视频教法资源")
+    @PostMapping("/videos")
+    public Result<ResourceResponse> upload(@RequestBody UploadVideoRequest request, Authentication authentication) {
+        User user = currentUserService.requireUser(authentication);
+        teacherAccessService.requireAny(authentication, "novice");
+        return Result.success(teachingLibraryService.uploadVideo(user, request));
+    }
+
+    @Operation(summary = "更新视频教法资源")
+    @PutMapping("/videos/{id}")
+    public Result<ResourceResponse> update(@PathVariable Long id, @RequestBody UploadVideoRequest request, Authentication authentication) {
+        User user = currentUserService.requireUser(authentication);
+        return Result.success(teachingLibraryService.updateVideo(user, id, request));
+    }
+
+    @Operation(summary = "删除视频教法资源")
+    @DeleteMapping("/videos/{id}")
+    public Result<Void> delete(@PathVariable Long id, Authentication authentication) {
+        User user = currentUserService.requireUser(authentication);
+        teachingLibraryService.deleteVideo(user, id);
+        return Result.success(null);
     }
 
     @Operation(summary = "记录观看本土教法资源")
