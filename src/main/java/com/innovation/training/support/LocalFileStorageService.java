@@ -63,7 +63,7 @@ public class LocalFileStorageService {
         if ("oss".equalsIgnoreCase(properties.getStorageType())) {
             return storeToOss(bytes, safeOriginalName, contentType, relativePath);
         }
-        Path root = Path.of(properties.getUploadRoot()).toAbsolutePath().normalize();
+        Path root = properties.resolveUploadRoot();
         Path targetDir = root.resolve(relativeDir).normalize();
         Path target = targetDir.resolve(storedName).normalize();
         if (!target.startsWith(root)) {

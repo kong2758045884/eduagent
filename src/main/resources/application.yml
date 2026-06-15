@@ -11,8 +11,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/training_backend?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    username: training_backend
+    password: XWTM7NXbS4nbn2rY
 
 mybatis-plus:
   configuration:
@@ -29,7 +29,7 @@ jwt:
 
 ai:
   qwen:
-    # Set DASHSCOPE_API_KEY before running locally. Do not commit real API keys.
+    # Optional override; blank values keep the backend default key.
     api-key: ${DASHSCOPE_API_KEY:}
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
     native-base-url: https://dashscope.aliyuncs.com/api/v1

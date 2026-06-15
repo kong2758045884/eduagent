@@ -1,11 +1,12 @@
 package com.innovation.training.module.ai;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 @ConfigurationProperties(prefix = "ai.qwen")
 public class QwenProperties {
 
-    private String apiKey;
+    private String apiKey = "sk-3e614319365042bf81c07a6a1f76afad";
 
     private String baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 
@@ -30,7 +31,9 @@ public class QwenProperties {
     }
 
     public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+        if (StringUtils.hasText(apiKey)) {
+            this.apiKey = apiKey;
+        }
     }
 
     public String getBaseUrl() {
