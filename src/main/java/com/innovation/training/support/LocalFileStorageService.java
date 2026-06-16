@@ -52,7 +52,7 @@ public class LocalFileStorageService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "File content must not be empty");
         }
         if (bytes.length > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "File must not exceed 10MB");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "文件不能超过 500MB");
         }
         String safeOriginalName = StringUtils.hasText(originalName) ? originalName : "generated";
         String extension = resolveExtension(safeOriginalName);

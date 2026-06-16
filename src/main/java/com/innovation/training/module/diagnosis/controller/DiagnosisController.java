@@ -4,6 +4,7 @@ import com.innovation.training.common.Result;
 import com.innovation.training.module.diagnosis.dto.ArchiveDiagnosisRequest;
 import com.innovation.training.module.diagnosis.dto.CreateDiagnosisRequest;
 import com.innovation.training.module.diagnosis.dto.DiagnosisResponse;
+import com.innovation.training.module.diagnosis.dto.DiagnosisTrendResponse;
 import com.innovation.training.module.diagnosis.service.ClassHeatmapResponse;
 import com.innovation.training.module.diagnosis.service.DiagnosisService;
 import com.innovation.training.module.diagnosis.service.StudentDiagnosisProfileResponse;
@@ -15,9 +16,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -103,6 +106,27 @@ public class DiagnosisController {
                                                 @RequestParam(required = false, defaultValue = "180") Integer days,
                                                 Authentication authentication) {
         return Result.success(diagnosisService.heatmap(currentUserService.requireUserId(authentication), className, days));
+    }
+
+    @Operation(summary = "获取近7日诊断趋势数据")
+    @GetMapping("/trend")
+    public Result<DiagnosisTrendResponse> trend(Authentication authentication) {
+        return Result.success(diagnosisService.trend(currentUserService.requireUserId(authentication)));
+    }
+
+    @Operation(summary = "更新诊断报告")
+    @PutMapping("/{id}")
+    public Result<DiagnosisResponse> update(@PathVariable Long id,
+                                             @Valid @RequestBody CreateDiagnosisRequest request,
+                                             Authentication authentication) {
+        return Result.success(diagnosisService.update(currentUserService.requireUserId(authentication), id, request));
+    }
+
+    @Operation(summary = "删除诊断报告")
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id, Authentication authentication) {
+        diagnosisService.delete(currentUserService.requireUserId(authentication), id);
+        return Result.success(null);
     }
 
     @Operation(summary = "归档诊断报告到成长档案")

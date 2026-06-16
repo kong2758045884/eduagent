@@ -9,6 +9,7 @@ import com.innovation.training.module.ai.AiGenerationService;
 import com.innovation.training.module.ai.QwenOcrClient;
 import com.innovation.training.module.diagnosis.dto.CreateDiagnosisRequest;
 import com.innovation.training.module.diagnosis.dto.DiagnosisResponse;
+import com.innovation.training.module.diagnosis.dto.DiagnosisTrendResponse;
 import com.innovation.training.module.diagnosis.entity.DiagnosisReport;
 import com.innovation.training.module.diagnosis.mapper.DiagnosisReportMapper;
 import com.innovation.training.module.diagnosis.service.ClassHeatmapResponse;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -160,6 +163,52 @@ public class DiagnosisServiceImpl implements DiagnosisService {
     }
 
     @Override
+    public DiagnosisTrendResponse trend(Long userId) {
+        LocalDate today = LocalDate.now();
+        List<String> days = new ArrayList<>();
+        List<Long> counts = new ArrayList<>();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            days.add(date.toString().substring(5)); // MM-DD
+            LocalDateTime start = date.atStartOfDay();
+            LocalDateTime end = date.plusDays(1).atStartOfDay();
+            Long count = diagnosisReportMapper.selectCount(new LambdaQueryWrapper<DiagnosisReport>()
+                    .eq(DiagnosisReport::getUserId, userId)
+                    .ge(DiagnosisReport::getCreatedAt, start)
+                    .lt(DiagnosisReport::getCreatedAt, end));
+            counts.add(count);
+        }
+        return new DiagnosisTrendResponse(days, counts);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public DiagnosisResponse update(Long userId, Long id, CreateDiagnosisRequest request) {
+        DiagnosisReport report = requireOwned(userId, id);
+        if (StringUtils.hasText(request.getStudentName())) report.setStudentName(request.getStudentName().trim());
+        if (StringUtils.hasText(request.getClassName())) report.setClassName(request.getClassName().trim());
+        if (StringUtils.hasText(request.getTopic())) report.setTopic(request.getTopic().trim());
+        if (StringUtils.hasText(request.getQuestionText())) report.setQuestionText(request.getQuestionText().trim());
+        if (StringUtils.hasText(request.getAnswerText())) report.setAnswerText(request.getAnswerText().trim());
+        diagnosisReportMapper.updateById(report);
+        return DiagnosisResponse.from(report);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long userId, Long id) {
+        requireOwned(userId, id);
+        diagnosisReportMapper.deleteById(id);
+    }
+
+    private DiagnosisReport requireOwned(Long userId, Long id) {
+        DiagnosisReport report = diagnosisReportMapper.selectOne(new LambdaQueryWrapper<DiagnosisReport>()
+                .eq(DiagnosisReport::getId, id).eq(DiagnosisReport::getUserId, userId).last("LIMIT 1"));
+        if (report == null) throw new BusinessException(ErrorCode.BAD_REQUEST, "诊断记录不存在");
+        return report;
+    }
+
+    @Override
     public DiagnosisResponse archive(Long userId, Long diagnosisId, String note) {
         DiagnosisReport report = diagnosisReportMapper.selectOne(new LambdaQueryWrapper<DiagnosisReport>()
                 .eq(DiagnosisReport::getId, diagnosisId)
@@ -213,6 +262,7 @@ public class DiagnosisServiceImpl implements DiagnosisService {
         response.setLatestInterventions(latest.getInterventions());
         response.setReportCount(count);
         response.setRiskLevel(riskLevel(count));
+        response.setLatestImageUrl(latest.getImageUrl());
         response.setLatestAt(latest.getCreatedAt());
         return response;
     }

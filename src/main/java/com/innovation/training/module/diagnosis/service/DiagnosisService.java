@@ -2,6 +2,7 @@ package com.innovation.training.module.diagnosis.service;
 
 import com.innovation.training.module.diagnosis.dto.CreateDiagnosisRequest;
 import com.innovation.training.module.diagnosis.dto.DiagnosisResponse;
+import com.innovation.training.module.diagnosis.dto.DiagnosisTrendResponse;
 import com.innovation.training.support.StoredFile;
 
 import java.util.List;
@@ -21,4 +22,10 @@ public interface DiagnosisService {
     ClassHeatmapResponse heatmap(Long userId, String className, Integer days);
 
     DiagnosisResponse archive(Long userId, Long diagnosisId, String note);
+
+    DiagnosisTrendResponse trend(Long userId);
+
+    DiagnosisResponse update(Long userId, Long id, CreateDiagnosisRequest request);
+
+    void delete(Long userId, Long id);
 }

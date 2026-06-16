@@ -12,8 +12,11 @@ public class StudentDiagnosisSummaryResponse {
     private String latestInterventions;
     private Long reportCount;
     private String riskLevel;
+    private String latestImageUrl;
     private LocalDateTime latestAt;
 
+    public String getLatestImageUrl() { return latestImageUrl; }
+    public void setLatestImageUrl(String latestImageUrl) { this.latestImageUrl = latestImageUrl; }
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
     public String getClassName() { return className; }

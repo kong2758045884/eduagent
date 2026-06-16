@@ -76,23 +76,42 @@ public class QwenOcrClient {
     }
 
     private String extractContent(Map<?, ?> response) {
-        if (response == null) {
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "千问 OCR 返回为空");
-        }
-        Object choicesObject = response.get("choices");
-        if (choicesObject instanceof List<?> choices && !choices.isEmpty()) {
-            Object firstChoice = choices.get(0);
-            if (firstChoice instanceof Map<?, ?> choice) {
-                Object messageObject = choice.get("message");
-                if (messageObject instanceof Map<?, ?> message) {
-                    Object content = message.get("content");
-                    if (content instanceof String text && StringUtils.hasText(text)) {
-                        return text.trim();
+        if (response == null) throw new BusinessException(ErrorCode.INTERNAL_ERROR, "千问 OCR 返回为空");
+        try {
+            Object choicesObject = response.get("choices");
+            if (choicesObject instanceof List<?> choices && !choices.isEmpty()) {
+                Object firstChoice = choices.get(0);
+                if (firstChoice instanceof Map<?, ?> choice) {
+                    Object msgObj = choice.get("message");
+                    if (msgObj instanceof Map<?, ?> message) {
+                        Object content = message.get("content");
+                        if (content instanceof String text) {
+                if (StringUtils.hasText(text)) return text.trim();
+                return "（图片中未识别到文字内容）";
+            }
+                        if (content instanceof List<?> parts) {
+                            StringBuilder sb = new StringBuilder();
+                            for (Object part : parts) {
+                                if (part instanceof Map<?, ?> p) {
+                                    Object t = p.get("text");
+                                    if (t instanceof String s) sb.append(s);
+                                    else if (t != null) sb.append(t.toString());
+                                }
+                            }
+                            String result = sb.toString().trim();
+                            if (!result.isEmpty()) return result;
+                        }
                     }
                 }
             }
+            /* 如果以上都失败，尝试从 response 中提取任何文本 */
+            String fallback = response.toString();
+            if (fallback.length() > 2000) fallback = fallback.substring(0, 2000);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "OCR 解析失败，响应: " + fallback);
+        } catch (BusinessException e) { throw e; }
+        catch (Exception e) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "OCR 解析异常: " + e.getMessage());
         }
-        throw new BusinessException(ErrorCode.INTERNAL_ERROR, "千问 OCR 返回格式异常");
     }
 
     private void logCall(int promptChars, int responseChars, long elapsedMs, boolean success, String errorMessage) {

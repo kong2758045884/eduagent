@@ -11,8 +11,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/training_backend?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: training_backend
-    password: XWTM7NXbS4nbn2rY
+    username: root
+    password: 123456
 
 mybatis-plus:
   configuration:
@@ -30,13 +30,13 @@ jwt:
 ai:
   qwen:
     # Optional override; blank values keep the backend default key.
-    api-key: ${DASHSCOPE_API_KEY:}
+    api-key: ${DASHSCOPE_API_KEY:sk-3e614319365042bf81c07a6a1f76afad}
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
     native-base-url: https://dashscope.aliyuncs.com/api/v1
     text-model: qwen-plus
     vision-model: qwen-vl-plus
     audio-model: qwen3-asr-flash
-    ocr-model: qwen-vl-ocr-latest
+    ocr-model: qwen-vl-plus
     temperature: 0.4
     timeout-seconds: 60
     speech-max-base64-bytes: 10485760
