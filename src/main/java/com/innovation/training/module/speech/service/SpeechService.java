@@ -27,7 +27,7 @@ public class SpeechService {
 
     @Transactional(rollbackFor = Exception.class)
     public SpeechTranscriptionResponse transcribe(Long userId, MultipartFile file, String language, String bizType, Long bizId) {
-        StoredFile storedFile = fileStorageService.store(file, "speech");
+        StoredFile storedFile = fileStorageService.storeWithBytes(file, "speech");
         FileResponse fileResponse = appFileService.record(userId, storedFile,
                 bizType == null || bizType.isBlank() ? "speech" : bizType, bizId);
         String transcript = qwenSpeechClient.transcribe(storedFile.getBytes(), storedFile.getContentType(), language);

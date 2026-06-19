@@ -10,9 +10,9 @@ spring:
       max-request-size: 500MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/training_backend?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: GENE
+    url: jdbc:mysql://127.0.0.1:3306/training_backend?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: training_backend
+    password: XWTM7NXbS4nbn2rY
 
 mybatis-plus:
   configuration:
@@ -29,8 +29,8 @@ jwt:
 
 ai:
   qwen:
-    # Optional override; blank values keep the backend default key.
-    api-key: ${DASHSCOPE_API_KEY:sk-3e614319365042bf81c07a6a1f76afad}
+    # 本地开发固定使用该 Key，不读取 DASHSCOPE_API_KEY 环境变量。
+    api-key: "sk-ws-H.RPMHEEH.oqJ7.MEUCIHgG8yGgkzx1EmfWJ6xbfgFoF_pM-J2rdAWWMc3DlxfNAiEAj8ukyzLImC95d_YEglt9-UlDO7pWAwpCBrVfq2iOZMY"
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
     native-base-url: https://dashscope.aliyuncs.com/api/v1
     text-model: qwen-plus

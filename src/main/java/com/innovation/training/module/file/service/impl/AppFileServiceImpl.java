@@ -42,7 +42,7 @@ public class AppFileServiceImpl implements AppFileService {
         file.setContentType(storedFile.getContentType());
         file.setRelativePath(storedFile.getRelativePath());
         file.setPublicUrl(storedFile.getPublicUrl());
-        file.setSize((long) storedFile.getBytes().length);
+        file.setSize(storedFile.getSize());
         file.setBizType(StringUtils.hasText(bizType) ? bizType : "misc");
         file.setBizId(bizId);
         file.setCreatedAt(LocalDateTime.now());

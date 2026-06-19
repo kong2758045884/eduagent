@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 @ConfigurationProperties(prefix = "ai.qwen")
 public class QwenProperties {
 
-    private String apiKey = "sk-3e614319365042bf81c07a6a1f76afad";
+    private String apiKey = "sk-ws-H.RPMHEEH.oqJ7.MEUCIHgG8yGgkzx1EmfWJ6xbfgFoF_pM-J2rdAWWMc3DlxfNAiEAj8ukyzLImC95d_YEglt9-UlDO7pWAwpCBrVfq2iOZMY";
 
     private String baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 

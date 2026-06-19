@@ -64,7 +64,7 @@ public class DiagnosisController {
                                             @RequestParam(required = false) String answerText,
                                             @RequestParam(required = false) String imageNote,
                                             Authentication authentication) {
-        StoredFile storedFile = fileStorageService.store(file, "diagnosis");
+        StoredFile storedFile = fileStorageService.storeWithBytes(file, "diagnosis");
         CreateDiagnosisRequest request = new CreateDiagnosisRequest();
         request.setStudentName(studentName);
         request.setClassName(className);
